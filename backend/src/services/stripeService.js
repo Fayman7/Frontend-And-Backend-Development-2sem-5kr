@@ -4,10 +4,17 @@ import { getOrderById, updateOrderStatus, restoreOrderStock } from './orderServi
 
 let stripeClient = null;
 
+function isStripeConfigured(key) {
+  if (!key) return false;
+  const placeholders = ['your_key', 'placeholder', 'changeme', 'sk_test_xxx'];
+  const lower = key.toLowerCase();
+  return !placeholders.some((p) => lower.includes(p));
+}
+
 export function getStripe() {
   if (!stripeClient) {
     const key = process.env.STRIPE_SECRET_KEY;
-    if (!key || key.includes('your_key')) {
+    if (!isStripeConfigured(key)) {
       return null;
     }
     stripeClient = new Stripe(key);

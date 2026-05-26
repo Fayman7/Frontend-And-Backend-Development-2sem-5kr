@@ -1,5 +1,9 @@
 import { jest } from '@jest/globals';
 
+jest.unstable_mockModule('../src/db/pool.js', () => ({
+  default: { query: jest.fn().mockResolvedValue({ rows: [] }) },
+}));
+
 jest.unstable_mockModule('../src/services/orderService.js', () => ({
   getOrderById: jest.fn(),
   updateOrderStatus: jest.fn(),
@@ -7,9 +11,14 @@ jest.unstable_mockModule('../src/services/orderService.js', () => ({
 }));
 
 const orderService = await import('../src/services/orderService.js');
-const { createPaymentIntent, confirmMockPayment } = await import(
+const { createPaymentIntent, confirmMockPayment, setStripe } = await import(
   '../src/services/stripeService.js'
 );
+
+beforeEach(() => {
+  setStripe(null);
+  process.env.STRIPE_SECRET_KEY = 'sk_test_placeholder';
+});
 
 describe('stripeService', () => {
   test('createPaymentIntent mock mode', async () => {
