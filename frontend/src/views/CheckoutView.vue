@@ -11,22 +11,27 @@
       </button>
     </div>
 
-    <div v-else id="payment-element" class="stripe-element"></div>
-    <button
-      v-if="!mockMode && clientSecret"
-      class="btn-primary"
-      :disabled="paying"
-      @click="pay"
-    >
-      {{ paying ? 'Processing...' : 'Pay now' }}
-    </button>
+    <template v-else>
+      <p class="muted test-hint">
+        Test card: 4242 4242 4242 4242 · any future date · any CVC
+      </p>
+      <div id="payment-element" class="stripe-element"></div>
+      <button
+        v-if="clientSecret"
+        class="btn-primary"
+        :disabled="paying"
+        @click="pay"
+      >
+        {{ paying ? 'Processing...' : 'Pay now' }}
+      </button>
+    </template>
     <p v-if="error" class="error">{{ error }}</p>
     <p v-if="success" class="success">Payment successful!</p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { loadStripe } from '@stripe/stripe-js';
 import api from '@/api/client';
@@ -56,11 +61,29 @@ async function initPayment() {
 
   if (!data.mock) {
     const pk = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+    if (!pk || pk.includes('your_key') || pk.includes('placeholder')) {
+      error.value =
+        'Stripe publishable key not set. Add VITE_STRIPE_PUBLISHABLE_KEY to .env and rebuild.';
+      mockMode.value = true;
+      return;
+    }
     stripe = await loadStripe(pk);
-    elements = stripe.elements({ clientSecret: data.clientSecret });
+    await nextTick();
+    elements = stripe.elements({
+      clientSecret: data.clientSecret,
+      appearance: { theme: 'night', variables: { colorPrimary: '#3d9cf5' } },
+    });
     const paymentElement = elements.create('payment');
     paymentElement.mount('#payment-element');
   }
+}
+
+async function syncOrderStatus() {
+  const { data } = await api.post('/checkout/sync-status', {
+    orderId: Number(route.params.orderId),
+  });
+  order.value = data.order;
+  return data.order;
 }
 
 async function pay() {
@@ -77,6 +100,7 @@ async function pay() {
     if (stripeError) {
       error.value = stripeError.message;
     } else {
+      await syncOrderStatus();
       success.value = true;
       setTimeout(() => router.push(`/orders/${route.params.orderId}`), 1500);
     }
@@ -119,6 +143,11 @@ onMounted(async () => {
 
 .mock-pay {
   margin: 1.5rem 0;
+}
+
+.test-hint {
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
 }
 
 .error {

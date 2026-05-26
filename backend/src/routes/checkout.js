@@ -3,11 +3,20 @@ import { authenticate } from '../middleware/auth.js';
 import {
   createPaymentIntent,
   confirmMockPayment,
+  syncPaymentFromStripe,
+  isStripeConfigured,
 } from '../services/stripeService.js';
 
 const router = Router();
 
 router.use(authenticate);
+
+router.get('/config', (_req, res) => {
+  res.json({
+    stripeEnabled: isStripeConfigured(process.env.STRIPE_SECRET_KEY),
+    webhookConfigured: isStripeConfigured(process.env.STRIPE_WEBHOOK_SECRET),
+  });
+});
 
 router.post('/payment-intent', async (req, res, next) => {
   try {
@@ -15,6 +24,17 @@ router.post('/payment-intent', async (req, res, next) => {
     if (!orderId) return res.status(400).json({ error: 'orderId required' });
     const result = await createPaymentIntent(Number(orderId), req.user.sub);
     res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/sync-status', async (req, res, next) => {
+  try {
+    const { orderId } = req.body;
+    if (!orderId) return res.status(400).json({ error: 'orderId required' });
+    const order = await syncPaymentFromStripe(Number(orderId), req.user.sub);
+    res.json({ order });
   } catch (err) {
     next(err);
   }

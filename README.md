@@ -36,15 +36,16 @@ docker compose up --build
 
 При первом запуске API автоматически выполняет миграции и seed.
 
-### Stripe webhook (локальная разработка)
+### Stripe
 
-```bash
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
-```
+Полная инструкция: **[docs/STRIPE_SETUP.md](docs/STRIPE_SETUP.md)**
 
-Скопируйте `whsec_…` в `.env` → `STRIPE_WEBHOOK_SECRET`.
+1. Ключи из [Stripe Dashboard (test)](https://dashboard.stripe.com/test/apikeys) → файл `.env`
+2. Проверка: `cd backend && npm run stripe:check`
+3. Webhook: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
+4. Docker: после `.env` выполните `docker compose build --no-cache web api && docker compose up -d`
 
-Без ключей Stripe приложение работает в **mock-режиме** (кнопка «Complete mock payment» на checkout).
+Тестовая карта: `4242 4242 4242 4242`. Без ключей — **mock-режим** на checkout.
 
 ## Локальная разработка без Docker
 

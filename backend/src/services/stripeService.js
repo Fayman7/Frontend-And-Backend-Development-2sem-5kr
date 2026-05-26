@@ -4,11 +4,27 @@ import { getOrderById, updateOrderStatus, restoreOrderStock } from './orderServi
 
 let stripeClient = null;
 
-function isStripeConfigured(key) {
-  if (!key) return false;
-  const placeholders = ['your_key', 'placeholder', 'changeme', 'sk_test_xxx'];
-  const lower = key.toLowerCase();
-  return !placeholders.some((p) => lower.includes(p));
+const PLACEHOLDER_FRAGMENTS = [
+  'your_key',
+  'your_webhook',
+  'placeholder',
+  'changeme',
+  'sk_test_xxx',
+  'pk_test_xxx',
+  'whsec_xxx',
+];
+
+export function isStripeConfigured(key) {
+  if (!key || !String(key).trim()) return false;
+  const lower = String(key).toLowerCase();
+  return !PLACEHOLDER_FRAGMENTS.some((p) => lower.includes(p));
+}
+
+export function isStripeReady() {
+  return (
+    isStripeConfigured(process.env.STRIPE_SECRET_KEY) &&
+    isStripeConfigured(process.env.STRIPE_WEBHOOK_SECRET)
+  );
 }
 
 export function getStripe() {
@@ -76,7 +92,7 @@ export async function handleStripeWebhook(rawBody, signature) {
   const stripe = getStripe();
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  if (!stripe || !secret || secret.includes('your_webhook')) {
+  if (!stripe || !isStripeConfigured(secret)) {
     return { received: true, skipped: true };
   }
 
@@ -100,6 +116,42 @@ export async function handleStripeWebhook(rawBody, signature) {
   }
 
   return { received: true };
+}
+
+/** Sync order status from Stripe (dev fallback when webhooks are not forwarded). */
+export async function syncPaymentFromStripe(orderId, userId) {
+  const stripe = getStripe();
+  const order = await getOrderById(orderId, userId);
+  if (!order) {
+    const err = new Error('Order not found');
+    err.status = 404;
+    throw err;
+  }
+  if (order.status === 'paid') {
+    return order;
+  }
+  if (!stripe || !order.stripe_payment_intent_id) {
+    return order;
+  }
+  if (order.stripe_payment_intent_id.startsWith('pi_mock_')) {
+    return order;
+  }
+
+  const intent = await stripe.paymentIntents.retrieve(
+    order.stripe_payment_intent_id
+  );
+
+  if (intent.status === 'succeeded') {
+    await updateOrderStatus(orderId, 'paid', intent.id);
+  } else if (
+    intent.status === 'canceled' ||
+    intent.status === 'requires_payment_method'
+  ) {
+    await updateOrderStatus(orderId, 'failed', intent.id);
+    await restoreOrderStock(orderId);
+  }
+
+  return getOrderById(orderId, userId);
 }
 
 export async function confirmMockPayment(orderId, userId) {
