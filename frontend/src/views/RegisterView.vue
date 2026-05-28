@@ -1,16 +1,16 @@
 <template>
   <div class="auth card">
-    <h1>Register</h1>
+    <h1>Регистрация</h1>
     <form @submit.prevent="submit">
-      <label>Email</label>
+      <label>Почта</label>
       <input v-model="email" type="email" required />
-      <label>Password (min 6 chars)</label>
+      <label>Пароль (минимум 6 символов)</label>
       <input v-model="password" type="password" minlength="6" required />
       <p v-if="auth.error" class="error">{{ auth.error }}</p>
-      <button class="btn-primary" type="submit" :disabled="auth.loading">Sign up</button>
+      <button class="btn-primary" type="submit" :disabled="auth.loading">Зарегистрироваться</button>
     </form>
     <p class="muted">
-      Have an account? <router-link to="/login">Login</router-link>
+      Уже есть аккаунт? <router-link to="/login">Войти</router-link>
     </p>
   </div>
 </template>

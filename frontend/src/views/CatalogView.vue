@@ -1,33 +1,33 @@
 <template>
   <div>
-    <h1>Catalog</h1>
+    <h1>Каталог</h1>
     <div class="filters card">
-      <input v-model="filters.q" placeholder="Search products..." @input="debouncedFetch" />
+      <input v-model="filters.q" placeholder="Поиск товаров..." @input="debouncedFetch" />
       <select v-model="filters.category" @change="fetchProducts">
-        <option value="">All categories</option>
+        <option value="">Все категории</option>
         <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
       </select>
-      <input v-model.number="filters.minPrice" type="number" placeholder="Min price" @change="fetchProducts" />
-      <input v-model.number="filters.maxPrice" type="number" placeholder="Max price" @change="fetchProducts" />
+      <input v-model.number="filters.minPrice" type="number" placeholder="Мин. цена" @change="fetchProducts" />
+      <input v-model.number="filters.maxPrice" type="number" placeholder="Макс. цена" @change="fetchProducts" />
     </div>
-    <p v-if="loading" class="muted">Loading...</p>
+    <p v-if="loading" class="muted">Загрузка...</p>
     <div v-else class="grid grid-products">
       <article v-for="p in products" :key="p.id" class="card product-card">
         <img :src="p.image_url || 'https://picsum.photos/400/300'" :alt="p.name" />
         <h3>
           <router-link :to="`/product/${p.id}`">{{ p.name }}</router-link>
         </h3>
-        <p class="muted">{{ p.category }} · Stock: {{ p.stock }}</p>
+        <p class="muted">{{ p.category }} · В наличии: {{ p.stock }}</p>
         <p class="price">${{ Number(p.price).toFixed(2) }}</p>
         <button class="btn-primary" :disabled="p.stock < 1" @click="addToCart(p)">
-          Add to cart
+          В корзину
         </button>
       </article>
     </div>
     <div v-if="totalPages > 1" class="pagination">
-      <button :disabled="page <= 1" @click="page--; fetchProducts()">Prev</button>
-      <span>Page {{ page }} / {{ totalPages }}</span>
-      <button :disabled="page >= totalPages" @click="page++; fetchProducts()">Next</button>
+      <button :disabled="page <= 1" @click="page--; fetchProducts()">Назад</button>
+      <span>Страница {{ page }} / {{ totalPages }}</span>
+      <button :disabled="page >= totalPages" @click="page++; fetchProducts()">Вперёд</button>
     </div>
   </div>
 </template>

@@ -1,19 +1,19 @@
 <template>
   <div class="checkout card">
-    <h1>Checkout</h1>
-    <p v-if="order">Order #{{ order.id }} — ${{ Number(order.total).toFixed(2) }}</p>
-    <p v-if="order" class="muted">Status: {{ order.status }}</p>
+    <h1>Оплата</h1>
+    <p v-if="order">Заказ №{{ order.id }} — ${{ Number(order.total).toFixed(2) }}</p>
+    <p v-if="order" class="muted">Статус: {{ formatStatus(order.status) }}</p>
 
     <div v-if="mockMode" class="mock-pay">
-      <p class="muted">Stripe test keys not configured — mock payment mode.</p>
+      <p class="muted">Ключи Stripe не настроены — включён тестовый режим без оплаты.</p>
       <button class="btn-primary" :disabled="paying" @click="mockPay">
-        {{ paying ? 'Processing...' : 'Complete mock payment' }}
+        {{ paying ? 'Обработка...' : 'Подтвердить тестовую оплату' }}
       </button>
     </div>
 
     <template v-else>
       <p class="muted test-hint">
-        Test card: 4242 4242 4242 4242 · any future date · any CVC
+        Тестовая карта: 4242 4242 4242 4242 · любая будущая дата · любой CVC
       </p>
       <div id="payment-element" class="stripe-element"></div>
       <button
@@ -22,11 +22,11 @@
         :disabled="paying"
         @click="pay"
       >
-        {{ paying ? 'Processing...' : 'Pay now' }}
+        {{ paying ? 'Обработка...' : 'Оплатить' }}
       </button>
     </template>
     <p v-if="error" class="error">{{ error }}</p>
-    <p v-if="success" class="success">Payment successful!</p>
+    <p v-if="success" class="success">Оплата прошла успешно!</p>
   </div>
 </template>
 
@@ -47,6 +47,13 @@ const success = ref(false);
 let stripe = null;
 let elements = null;
 
+function formatStatus(status) {
+  if (status === 'paid') return 'оплачен';
+  if (status === 'pending') return 'в обработке';
+  if (status === 'failed') return 'ошибка';
+  return status;
+}
+
 async function loadOrder() {
   const { data } = await api.get(`/orders/${route.params.orderId}`);
   order.value = data.order;
@@ -63,7 +70,7 @@ async function initPayment() {
     const pk = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
     if (!pk || pk.includes('your_key') || pk.includes('placeholder')) {
       error.value =
-        'Stripe publishable key not set. Add VITE_STRIPE_PUBLISHABLE_KEY to .env and rebuild.';
+        'Публичный ключ Stripe не задан. Добавьте VITE_STRIPE_PUBLISHABLE_KEY в .env и пересоберите проект.';
       mockMode.value = true;
       return;
     }
@@ -119,7 +126,7 @@ async function mockPay() {
     success.value = true;
     router.push(`/orders/${route.params.orderId}`);
   } catch (e) {
-    error.value = e.response?.data?.error || 'Payment failed';
+    error.value = e.response?.data?.error || 'Оплата не выполнена';
   } finally {
     paying.value = false;
   }

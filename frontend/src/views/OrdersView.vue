@@ -1,17 +1,17 @@
 <template>
   <div>
-    <h1>Order history</h1>
-    <p v-if="loading" class="muted">Loading...</p>
+    <h1>История заказов</h1>
+    <p v-if="loading" class="muted">Загрузка...</p>
     <ul v-else class="orders">
       <li v-for="o in orders" :key="o.id" class="card">
         <router-link :to="`/orders/${o.id}`">
-          Order #{{ o.id }} — ${{ Number(o.total).toFixed(2) }}
+          Заказ №{{ o.id }} — ${{ Number(o.total).toFixed(2) }}
         </router-link>
-        <span :class="['badge', o.status]">{{ o.status }}</span>
+        <span :class="['badge', o.status]">{{ formatStatus(o.status) }}</span>
         <p class="muted">{{ new Date(o.created_at).toLocaleString() }}</p>
       </li>
     </ul>
-    <p v-if="!loading && orders.length === 0" class="muted">No orders yet.</p>
+    <p v-if="!loading && orders.length === 0" class="muted">Заказов пока нет.</p>
   </div>
 </template>
 
@@ -21,6 +21,13 @@ import api from '@/api/client';
 
 const orders = ref([]);
 const loading = ref(true);
+
+function formatStatus(status) {
+  if (status === 'paid') return 'оплачен';
+  if (status === 'pending') return 'в обработке';
+  if (status === 'failed') return 'ошибка';
+  return status;
+}
 
 onMounted(async () => {
   try {

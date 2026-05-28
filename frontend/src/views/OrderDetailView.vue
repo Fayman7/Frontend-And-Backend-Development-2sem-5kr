@@ -1,17 +1,17 @@
 <template>
-  <div v-if="loading" class="muted">Loading...</div>
+  <div v-if="loading" class="muted">Загрузка...</div>
   <div v-else-if="order" class="card">
-    <h1>Order #{{ order.id }}</h1>
-    <p>Status: <span :class="['badge', order.status]">{{ order.status }}</span></p>
-    <p>Total: <strong>${{ Number(order.total).toFixed(2) }}</strong></p>
+    <h1>Заказ №{{ order.id }}</h1>
+    <p>Статус: <span :class="['badge', order.status]">{{ formatStatus(order.status) }}</span></p>
+    <p>Итого: <strong>${{ Number(order.total).toFixed(2) }}</strong></p>
     <p class="muted">{{ new Date(order.created_at).toLocaleString() }}</p>
-    <h2>Items</h2>
+    <h2>Товары</h2>
     <ul class="items">
       <li v-for="item in order.items" :key="item.productId">
         {{ item.name }} × {{ item.quantity }} — ${{ item.unitPrice.toFixed(2) }}
       </li>
     </ul>
-    <router-link to="/orders">Back to orders</router-link>
+    <router-link to="/orders">Назад к заказам</router-link>
   </div>
 </template>
 
@@ -23,6 +23,13 @@ import api from '@/api/client';
 const route = useRoute();
 const order = ref(null);
 const loading = ref(true);
+
+function formatStatus(status) {
+  if (status === 'paid') return 'оплачен';
+  if (status === 'pending') return 'в обработке';
+  if (status === 'failed') return 'ошибка';
+  return status;
+}
 
 onMounted(async () => {
   try {

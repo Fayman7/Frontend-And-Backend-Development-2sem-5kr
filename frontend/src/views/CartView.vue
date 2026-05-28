@@ -1,14 +1,14 @@
 <template>
   <div>
-    <h1>Cart</h1>
-    <p v-if="cart.items.length === 0" class="muted">Your cart is empty.</p>
+    <h1>Корзина</h1>
+    <p v-if="cart.items.length === 0" class="muted">Ваша корзина пуста.</p>
     <div v-else>
       <ul class="cart-list">
         <li v-for="item in cart.items" :key="item.productId" class="card cart-item">
           <img :src="item.imageUrl || 'https://picsum.photos/80'" alt="" />
           <div class="info">
             <strong>{{ item.name }}</strong>
-            <p>${{ item.price.toFixed(2) }} each</p>
+            <p>${{ item.price.toFixed(2) }} за шт.</p>
           </div>
           <input
             type="number"
@@ -19,21 +19,21 @@
             @change="updateQty(item.productId, +$event.target.value)"
           />
           <p class="line-total">${{ (item.price * item.quantity).toFixed(2) }}</p>
-          <button class="btn-danger" @click="cart.removeItem(item.productId)">Remove</button>
+          <button class="btn-danger" @click="cart.removeItem(item.productId)">Удалить</button>
         </li>
       </ul>
       <div class="summary card">
-        <p>Total: <strong>${{ cart.total.toFixed(2) }}</strong></p>
+        <p>Итого: <strong>${{ cart.total.toFixed(2) }}</strong></p>
         <button
           class="btn-primary"
           :disabled="checkoutLoading"
           @click="checkout"
         >
-          {{ checkoutLoading ? 'Processing...' : 'Checkout' }}
+          {{ checkoutLoading ? 'Обработка...' : 'Оформить заказ' }}
         </button>
         <p v-if="error" class="error">{{ error }}</p>
         <p v-if="!auth.isAuthenticated" class="muted">
-          <router-link to="/login">Login</router-link> to checkout
+          <router-link to="/login">Войдите</router-link>, чтобы оформить заказ
         </p>
       </div>
     </div>
@@ -74,7 +74,7 @@ async function checkout() {
     const { data } = await api.post('/orders');
     router.push({ name: 'checkout', params: { orderId: data.order.id } });
   } catch (e) {
-    error.value = e.response?.data?.error || 'Checkout failed';
+    error.value = e.response?.data?.error || 'Не удалось оформить заказ';
   } finally {
     checkoutLoading.value = false;
   }

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loading" class="muted">Loading...</div>
+  <div v-if="loading" class="muted">Загрузка...</div>
   <div v-else-if="product" class="detail card">
     <img :src="product.image_url || 'https://picsum.photos/600/400'" :alt="product.name" />
     <div class="info">
@@ -7,14 +7,14 @@
       <p class="muted">{{ product.category }}</p>
       <p>{{ product.description }}</p>
       <p class="price">${{ Number(product.price).toFixed(2) }}</p>
-      <p>In stock: {{ product.stock }}</p>
+      <p>В наличии: {{ product.stock }}</p>
       <div class="actions">
         <input v-model.number="qty" type="number" min="1" :max="product.stock" style="width: 80px" />
-        <button class="btn-primary" :disabled="product.stock < 1" @click="add">Add to cart</button>
+        <button class="btn-primary" :disabled="product.stock < 1" @click="add">В корзину</button>
       </div>
     </div>
   </div>
-  <p v-else>Product not found</p>
+  <p v-else>Товар не найден</p>
 </template>
 
 <script setup>

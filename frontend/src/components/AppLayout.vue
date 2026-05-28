@@ -1,28 +1,28 @@
 <template>
   <div class="layout">
     <header class="header">
-      <router-link to="/" class="logo">Shop</router-link>
+      <router-link to="/" class="logo">Магазин</router-link>
       <nav class="nav">
-        <router-link to="/">Catalog</router-link>
-        <router-link to="/cart">Cart ({{ cart.count }})</router-link>
-        <router-link v-if="auth.isAuthenticated" to="/orders">Orders</router-link>
-        <router-link v-if="auth.isAdmin" to="/admin">Admin</router-link>
+        <router-link to="/">Каталог</router-link>
+        <router-link to="/cart">Корзина ({{ cart.count }})</router-link>
+        <router-link v-if="auth.isAuthenticated" to="/orders">Заказы</router-link>
+        <router-link v-if="auth.isAdmin" to="/admin">Админ</router-link>
       </nav>
       <div class="auth-actions">
         <template v-if="auth.isAuthenticated">
           <span class="user-email">{{ auth.user?.email }}</span>
-          <button class="btn-secondary" @click="logout">Logout</button>
+          <button class="btn-secondary" @click="logout">Выйти</button>
         </template>
         <template v-else>
-          <router-link to="/login" class="btn-secondary btn">Login</router-link>
-          <router-link to="/register" class="btn-primary btn">Sign up</router-link>
+          <router-link to="/login" class="btn-secondary btn">Войти</router-link>
+          <router-link to="/register" class="btn-primary btn">Регистрация</router-link>
         </template>
       </div>
     </header>
     <main class="main">
       <router-view />
     </main>
-    <footer class="footer">E-Commerce Demo — Vue + Express + PostgreSQL + Stripe</footer>
+    <footer class="footer">Демо-магазин — Vue + Express + PostgreSQL + Stripe</footer>
   </div>
 </template>
 

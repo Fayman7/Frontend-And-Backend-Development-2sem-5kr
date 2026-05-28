@@ -1,17 +1,17 @@
 <template>
   <div>
-    <h1>Admin — Products</h1>
+    <h1>Админ — Товары</h1>
     <form class="card form" @submit.prevent="save">
-      <h2>{{ editing ? 'Edit' : 'Add' }} product</h2>
-      <input v-model="form.name" placeholder="Name" required />
-      <textarea v-model="form.description" placeholder="Description" rows="2" />
-      <input v-model.number="form.price" type="number" step="0.01" placeholder="Price" required />
-      <input v-model="form.category" placeholder="Category" />
-      <input v-model.number="form.stock" type="number" placeholder="Stock" />
-      <input v-model="form.image_url" placeholder="Image URL" />
+      <h2>{{ editing ? 'Редактировать' : 'Добавить' }} товар</h2>
+      <input v-model="form.name" placeholder="Название" required />
+      <textarea v-model="form.description" placeholder="Описание" rows="2" />
+      <input v-model.number="form.price" type="number" step="0.01" placeholder="Цена" required />
+      <input v-model="form.category" placeholder="Категория" />
+      <input v-model.number="form.stock" type="number" placeholder="Остаток" />
+      <input v-model="form.image_url" placeholder="Ссылка на изображение" />
       <div class="form-actions">
-        <button class="btn-primary" type="submit">{{ editing ? 'Update' : 'Create' }}</button>
-        <button v-if="editing" type="button" class="btn-secondary" @click="resetForm">Cancel</button>
+        <button class="btn-primary" type="submit">{{ editing ? 'Обновить' : 'Создать' }}</button>
+        <button v-if="editing" type="button" class="btn-secondary" @click="resetForm">Отмена</button>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
     </form>
@@ -19,11 +19,11 @@
     <table class="table card">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th>Category</th>
-          <th>Actions</th>
+          <th>Название</th>
+          <th>Цена</th>
+          <th>Остаток</th>
+          <th>Категория</th>
+          <th>Действия</th>
         </tr>
       </thead>
       <tbody>
@@ -41,8 +41,8 @@
           </td>
           <td>{{ p.category }}</td>
           <td>
-            <button class="btn-secondary" @click="edit(p)">Edit</button>
-            <button class="btn-danger" @click="remove(p.id)">Delete</button>
+            <button class="btn-secondary" @click="edit(p)">Изменить</button>
+            <button class="btn-danger" @click="remove(p.id)">Удалить</button>
           </td>
         </tr>
       </tbody>
@@ -102,7 +102,7 @@ async function save() {
     resetForm();
     await load();
   } catch (e) {
-    error.value = e.response?.data?.error || 'Save failed';
+    error.value = e.response?.data?.error || 'Не удалось сохранить';
   }
 }
 
@@ -112,7 +112,7 @@ async function updateStock(id, stock) {
 }
 
 async function remove(id) {
-  if (!confirm('Delete product?')) return;
+  if (!confirm('Удалить товар?')) return;
   await api.delete(`/admin/products/${id}`);
   await load();
 }

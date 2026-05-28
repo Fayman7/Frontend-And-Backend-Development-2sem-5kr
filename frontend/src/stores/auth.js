@@ -34,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
       await cartStore.syncWithServer();
       return data;
     } catch (e) {
-      error.value = e.response?.data?.error || 'Registration failed';
+      error.value = e.response?.data?.error || 'Ошибка регистрации';
       throw e;
     } finally {
       loading.value = false;
@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
       await cartStore.syncWithServer();
       return data;
     } catch (e) {
-      error.value = e.response?.data?.error || 'Login failed';
+      error.value = e.response?.data?.error || 'Ошибка входа';
       throw e;
     } finally {
       loading.value = false;
